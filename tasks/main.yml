@@ -1,0 +1,35 @@
+- name: Install PHP
+  apt:
+    name="{{ item }}"
+    state=present
+  with_items:
+    - php5
+    - php-pear
+    - php5-mysql
+  sudo: yes
+
+- name: Download basic server
+  get_url:
+    url: https://github.com/yiisoft/yii2/releases/download/2.0.10/yii-basic-app-2.0.10.tgz
+    dest: /tmp/yii.tgz
+    mode: 0440
+
+- name: Create destination folder
+  file:
+    path=/tmp/yii_basic
+    state=directory
+
+- name: Unarchive yii
+  unarchive:
+    src=/tmp/yii.tgz
+    dest=/tmp/yii_basic
+
+- name: Add yii configuration
+  template:
+    src=web.php
+    dest=/tmp/yii_basic/basic/config/web.php
+
+- name: Run yii server
+  shell: nohup php yii serve 0.0.0.0:8080 > /tmp/yii.log 2>&1 &
+  args:
+    chdir: /tmp/yii_basic/basic
