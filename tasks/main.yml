@@ -23,6 +23,7 @@
   unarchive:
     src=/tmp/yii.tgz
     dest=/tmp/yii_basic
+    copy=no
 
 - name: Add yii configuration
   template:
