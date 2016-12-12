@@ -13,24 +13,57 @@
     url: https://github.com/yiisoft/yii2/releases/download/2.0.10/yii-basic-app-2.0.10.tgz
     dest: /tmp/yii.tgz
     mode: 0440
+  sudo: yes
+  sudo_user: "{{ server_user }}"
 
 - name: Create destination folder
   file:
-    path=/tmp/yii_basic
-    state=directory
+    path: /opt/tinker/shared_files/yii_basic
+    state: directory
+    owner: "{{ server_user }}"
+    group: "{{ server_group }}"
+    mode: 0755
+  sudo: yes
+  sudo_user: tinkerware
 
 - name: Unarchive yii
   unarchive:
     src=/tmp/yii.tgz
-    dest=/tmp/yii_basic
+    dest=/opt/tinker/shared_files/yii_basic
     copy=no
+  sudo: yes
+  sudo_user: "{{ server_user }}"
+  when: yii_git_repo is undefined
+
+- name: Clone git yii repo
+  git:
+    repo: "{{ yii_git_repo }}"
+    dest: /opt/tinker/shared_files/yii_basic/basic/
+    version: "{{ yii_git_version }}"
+    update: yes
+    recursive: yes
+  when: yii_git_repo is defined
 
 - name: Add yii configuration
   template:
     src=web.php
-    dest=/tmp/yii_basic/basic/config/web.php
+    dest=/opt/tinker/shared_files/yii_basic/basic/config/web.php
+  sudo: yes
+  sudo_user: "{{ server_user }}"
 
 - name: Run yii server
   shell: nohup php yii serve 0.0.0.0:8080 > /tmp/yii.log 2>&1 &
   args:
-    chdir: /tmp/yii_basic/basic
+    chdir: /opt/tinker/shared_files/yii_basic/basic
+  sudo: yes
+  sudo_user: "{{ server_user }}"
+  tags: run_yii
+
+- name: Add cron jobs
+  cron:
+    name="Start yii fw"
+    special_time="reboot"
+    user="{{ server_user }}"
+    job="cd /opt/tinker/shared_files/yii_basic/basic && nohup php yii serve 0.0.0.0:8080 > /tmp/yii.log 2>&1 &"
+  sudo: yes
+  sudo_user: "{{ server_user }}"
