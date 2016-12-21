@@ -18,7 +18,7 @@
 
 - name: Create destination folder
   file:
-    path: /opt/tinker/shared_files/yii_basic
+    path: /opt/tinker/shared_files/yii_project
     state: directory
     owner: "{{ server_user }}"
     group: "{{ server_group }}"
@@ -29,7 +29,7 @@
 - name: Unarchive yii
   unarchive:
     src=/tmp/yii.tgz
-    dest=/opt/tinker/shared_files/yii_basic
+    dest=/opt/tinker/shared_files/yii_project
     copy=no
   sudo: yes
   sudo_user: "{{ server_user }}"
@@ -38,7 +38,7 @@
 - name: Clone git yii repo
   git:
     repo: "{{ yii_git_repo }}"
-    dest: /opt/tinker/shared_files/yii_basic/basic/
+    dest: /opt/tinker/shared_files/yii_project/basic/
     version: "{{ yii_git_version }}"
     update: yes
     recursive: yes
@@ -47,14 +47,14 @@
 - name: Add yii configuration
   template:
     src=web.php
-    dest=/opt/tinker/shared_files/yii_basic/basic/config/web.php
+    dest=/opt/tinker/shared_files/yii_project/basic/config/web.php
   sudo: yes
   sudo_user: "{{ server_user }}"
 
 - name: Run yii server
   shell: nohup php yii serve 0.0.0.0:8080 > /tmp/yii.log 2>&1 &
   args:
-    chdir: /opt/tinker/shared_files/yii_basic/basic
+    chdir: /opt/tinker/shared_files/yii_project/basic
   sudo: yes
   sudo_user: "{{ server_user }}"
   tags: run_yii
