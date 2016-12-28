@@ -24,7 +24,7 @@
     group: "{{ server_group }}"
     mode: 0755
   sudo: yes
-  sudo_user: tinkerware
+  sudo_user: "{{ server_user }}"
 
 - name: Unarchive yii
   unarchive:
