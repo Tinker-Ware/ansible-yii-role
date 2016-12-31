@@ -31,7 +31,7 @@
     src=/tmp/yii.tgz
     dest=/opt/tinker/shared_files/yii_project
     copy=no
-    creates=/opt/tinker/shared_files/yii_basic/basic/config
+    creates=/opt/tinker/shared_files/yii_project/basic/config
   sudo: yes
   sudo_user: "{{ server_user }}"
   when: yii_git_repo is undefined
@@ -54,7 +54,7 @@
 
 
 - name: Add yii configuration
-  command: mv /tmp/web.php /opt/tinker/shared_files/yii_basic/basic/config/web.php
+  command: mv /tmp/web.php /opt/tinker/shared_files/yii_project/basic/config/web.php
   sudo: yes
   sudo_user: "{{ server_user }}"
 
@@ -71,6 +71,6 @@
     name="Start yii fw"
     special_time="reboot"
     user="{{ server_user }}"
-    job="cd /opt/tinker/shared_files/yii_basic/basic && nohup php yii serve 0.0.0.0:8080 > /tmp/yii.log 2>&1 &"
+    job="cd /opt/tinker/shared_files/yii_project/basic && nohup php yii serve 0.0.0.0:8080 > /tmp/yii.log 2>&1 &"
   sudo: yes
   sudo_user: "{{ server_user }}"
