@@ -9,10 +9,10 @@
   sudo: yes
 
 - name: Download basic server
-  get_url:
-    url: https://github.com/yiisoft/yii2/releases/download/2.0.10/yii-basic-app-2.0.10.tgz
-    dest: /tmp/yii.tgz
-    mode: 0440
+  command: wget https://github.com/yiisoft/yii2/releases/download/2.0.10/yii-basic-app-2.0.10.tgz -O yii.tgz
+  args:
+    chdir: /tmp/
+    creates: /tmp/yii.tgz
   sudo: yes
   sudo_user: "{{ server_user }}"
 
@@ -31,6 +31,7 @@
     src=/tmp/yii.tgz
     dest=/opt/tinker/shared_files/yii_project
     copy=no
+    creates=/opt/tinker/shared_files/yii_basic/basic/config
   sudo: yes
   sudo_user: "{{ server_user }}"
   when: yii_git_repo is undefined
@@ -44,10 +45,16 @@
     recursive: yes
   when: yii_git_repo is defined
 
-- name: Add yii configuration
+- name: create yii configuration
   template:
     src=web.php
-    dest=/opt/tinker/shared_files/yii_project/basic/config/web.php
+    dest=/tmp/web.php
+  sudo: yes
+  sudo_user: "{{ server_user }}"
+
+
+- name: Add yii configuration
+  command: mv /tmp/web.php /opt/tinker/shared_files/yii_basic/basic/config/web.php
   sudo: yes
   sudo_user: "{{ server_user }}"
 
