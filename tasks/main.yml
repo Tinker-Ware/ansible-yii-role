@@ -8,14 +8,6 @@
     - php5-mysql
   sudo: yes
 
-- name: Download basic server
-  command: wget https://github.com/yiisoft/yii2/releases/download/2.0.10/yii-basic-app-2.0.10.tgz -O yii.tgz
-  args:
-    chdir: /tmp/
-    creates: /tmp/yii.tgz
-  sudo: yes
-  sudo_user: "{{ server_user }}"
-
 - name: Create destination folder
   file:
     path: /opt/tinker/shared_files/yii_project
@@ -26,23 +18,16 @@
   sudo: yes
   sudo_user: "{{ server_user }}"
 
-- name: Unarchive yii
-  unarchive:
-    src=/tmp/yii.tgz
-    dest=/opt/tinker/shared_files/yii_project
-    copy=no
-    creates=/opt/tinker/shared_files/yii_project/basic/config
-  sudo: yes
-  sudo_user: "{{ server_user }}"
-  when: yii_git_repo is undefined
-
 - name: Clone git yii repo
   git:
     repo: "{{ yii_git_repo }}"
-    dest: /opt/tinker/shared_files/yii_project/basic/
-    version: "{{ yii_git_version }}"
+    dest: "/opt/tinker/shared_files/yii_project/{{ yii_git_repo | basename }}"
+    version: "{{ yii_git_version  }}"
     update: yes
     recursive: yes
+    accept_hostkey: yes
+  sudo: yes
+  sudo_user: "{{ server_user }}"    
   when: yii_git_repo is defined
 
 - name: create yii configuration
@@ -52,25 +37,59 @@
   sudo: yes
   sudo_user: "{{ server_user }}"
 
-
 - name: Add yii configuration
-  command: mv /tmp/web.php /opt/tinker/shared_files/yii_project/basic/config/web.php
+  command: "mv /tmp/web.php /opt/tinker/shared_files/yii_project/{{ yii_git_repo | basename }}/config/web.php"
+  sudo: yes
+  sudo_user: "{{ server_user }}"
+  when: yii_git_repo is defined
+
+- name: Composer | Install
+  command: php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
+  args:
+    chdir: "/opt/tinker/shared_files/yii_project/{{ yii_git_repo | basename }}"
   sudo: yes
   sudo_user: "{{ server_user }}"
 
+- name: Composer | Verify
+  command: php -r "if (hash_file('SHA384', 'composer-setup.php') === '55d6ead61b29c7bdee5cccfb50076874187bd9f21f65d8991d46ec5cc90518f447387fb9f76ebae1fbbacf329e583e30') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); } echo PHP_EOL;"
+  args:
+    chdir: "/opt/tinker/shared_files/yii_project/{{ yii_git_repo | basename }}"
+  sudo: yes
+  sudo_user: "{{ server_user }}"
+
+- name: Composer | Setup
+  command: php composer-setup.php
+  args:
+    chdir: "/opt/tinker/shared_files/yii_project/{{ yii_git_repo | basename }}"
+  sudo: yes
+  sudo_user: "{{ server_user }}"    
+
+- name: Common commands
+  shell: "{{ item }}"
+  args:
+    chdir: "/opt/tinker/shared_files/yii_project/{{ yii_git_repo | basename }}"
+    creates:
+  with_items:
+    - 'php composer.phar global require "fxp/composer-asset-plugin"'
+    - 'php composer.phar update -n -o --prefer-dist'
+  sudo: yes
+  sudo_user: "{{ server_user }}"
+  when: yii_git_repo is defined
+  
 - name: Run yii server
   shell: nohup php yii serve 0.0.0.0:8080 > /tmp/yii.log 2>&1 &
   args:
-    chdir: /opt/tinker/shared_files/yii_project/basic
+    chdir: "/opt/tinker/shared_files/yii_project/{{ yii_git_repo | basename }}"
   sudo: yes
   sudo_user: "{{ server_user }}"
   tags: run_yii
+  when: yii_git_repo is defined
 
 - name: Add cron jobs
   cron:
     name="Start yii fw"
     special_time="reboot"
     user="{{ server_user }}"
-    job="cd /opt/tinker/shared_files/yii_project/basic && nohup php yii serve 0.0.0.0:8080 > /tmp/yii.log 2>&1 &"
+    job="cd /opt/tinker/shared_files/yii_project/{{ yii_git_repo | basename }} && nohup php yii serve 0.0.0.0:8080 > /tmp/yii.log 2>&1 &"
   sudo: yes
   sudo_user: "{{ server_user }}"
