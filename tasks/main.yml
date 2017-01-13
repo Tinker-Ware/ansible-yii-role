@@ -64,14 +64,14 @@
   sudo: yes
   sudo_user: "{{ server_user }}"    
 
-- name: Common commands
+- name: Install dependencies for repo and Update. This may take a while . . . . . 
   shell: "{{ item }}"
   args:
     chdir: "/opt/tinker/shared_files/yii_project/{{ yii_git_repo | basename }}"
     creates:
   with_items:
     - 'php composer.phar global require "fxp/composer-asset-plugin"'
-    - 'php composer.phar update -n -o --prefer-dist'
+    - "php composer.phar update -n -o --prefer-dist {{ yii_extra_flags }}"
   sudo: yes
   sudo_user: "{{ server_user }}"
   when: yii_git_repo is defined
