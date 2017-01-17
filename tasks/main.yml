@@ -64,17 +64,23 @@
   sudo: yes
   sudo_user: "{{ server_user }}"    
 
-- name: Install dependencies for repo and Update. This may take a while . . . . . 
-  shell: "{{ item }}"
+- name: Install Yii2 dependencies 
+  shell: 'php composer.phar global require "fxp/composer-asset-plugin"'
   args:
     chdir: "/opt/tinker/shared_files/yii_project/{{ yii_git_repo | basename }}"
     creates:
-  with_items:
-    - 'php composer.phar global require "fxp/composer-asset-plugin"'
-    - "php composer.phar update -n -o --prefer-dist {{ yii_extra_flags }}"
   sudo: yes
   sudo_user: "{{ server_user }}"
   when: yii_git_repo is defined
+
+- name: Install dependencies for repo and Update. This may take a while . . . . . 
+  shell: "php composer.phar update -n -o --prefer-dist {{ yii_extra_flags }}"
+  args:
+    chdir: "/opt/tinker/shared_files/yii_project/{{ yii_git_repo | basename }}"
+    creates:
+  sudo: yes
+  sudo_user: "{{ server_user }}"
+  when: yii_git_repo is defined  
   
 - name: Run yii server
   shell: nohup php yii serve 0.0.0.0:8080 > /tmp/yii.log 2>&1 &
