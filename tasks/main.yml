@@ -3,6 +3,7 @@
     name="{{ item }}"
     state=present
   with_items:
+    - php5-fpm
     - php5
     - php-pear
     - php5-mysql
