@@ -2,4 +2,4 @@ cookie_validation_key: pass
 
 yii_git_repo: https://github.com/yiisoft/yii2-app-basic.git
 yii_git_version: master
-yii_extra_flags: ""
+yii_extra_flags: "--no-dev"
