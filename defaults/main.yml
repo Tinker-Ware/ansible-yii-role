@@ -2,4 +2,4 @@ cookie_validation_key: pass
 
 yii_git_repo: https://github.com/Tinker-Ware/yii2-crud.git
 yii_git_version: master
-yii_extra_flags: ""
+yii_extra_flags: "--no-dev"

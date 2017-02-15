@@ -3,6 +3,7 @@
     name="{{ item }}"
     state=present
   with_items:
+    - php5-fpm
     - php5
     - php-pear
     - php5-mysql
@@ -23,7 +24,8 @@
     repo: "{{ yii_git_repo }}"
     dest: "/opt/tinker/shared_files/yii_project/{{ yii_git_repo | basename }}"
     version: "{{ yii_git_version  }}"
-    update: yes
+    update: no
+    force: no
     recursive: yes
     accept_hostkey: yes
   sudo: yes
@@ -47,6 +49,7 @@
   command: php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
   args:
     chdir: "/opt/tinker/shared_files/yii_project/{{ yii_git_repo | basename }}"
+    creates: "/opt/tinker/shared_files/yii_project/{{ yii_git_repo | basename }}/composer-setup.php"
   sudo: yes
   sudo_user: "{{ server_user }}"
 
@@ -61,6 +64,7 @@
   command: php composer-setup.php
   args:
     chdir: "/opt/tinker/shared_files/yii_project/{{ yii_git_repo | basename }}"
+    creates: "/opt/tinker/shared_files/yii_project/{{ yii_git_repo | basename }}/composer.phar"
   sudo: yes
   sudo_user: "{{ server_user }}"    
 
@@ -68,7 +72,7 @@
   shell: 'php composer.phar global require "fxp/composer-asset-plugin"'
   args:
     chdir: "/opt/tinker/shared_files/yii_project/{{ yii_git_repo | basename }}"
-    creates:
+    creates: "/home/{{ server_user }}/.composer/vendor"
   sudo: yes
   sudo_user: "{{ server_user }}"
   when: yii_git_repo is defined
@@ -77,7 +81,7 @@
   shell: "php composer.phar update -n -o --prefer-dist {{ yii_extra_flags }}"
   args:
     chdir: "/opt/tinker/shared_files/yii_project/{{ yii_git_repo | basename }}"
-    creates:
+    creates: "/opt/tinker/shared_files/yii_project/{{ yii_git_repo | basename }}/vendor" 
   sudo: yes
   sudo_user: "{{ server_user }}"
   when: yii_git_repo is defined  
