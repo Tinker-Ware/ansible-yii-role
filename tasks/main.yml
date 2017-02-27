@@ -25,12 +25,13 @@
     dest: "/opt/tinker/shared_files/yii_project/{{ yii_git_repo | basename }}"
     version: "{{ yii_git_version  }}"
     update: no
-    force: no
+    force: yes
     recursive: yes
     accept_hostkey: yes
   sudo: yes
   sudo_user: "{{ server_user }}"    
   when: yii_git_repo is defined
+  tags: update_repo
 
 - name: create yii configuration
   template:
@@ -38,12 +39,14 @@
     dest=/tmp/web.php
   sudo: yes
   sudo_user: "{{ server_user }}"
+  tags: update_repo
 
 - name: Add yii configuration
   command: "mv /tmp/web.php /opt/tinker/shared_files/yii_project/{{ yii_git_repo | basename }}/config/web.php"
   sudo: yes
   sudo_user: "{{ server_user }}"
   when: yii_git_repo is defined
+  tags: update_repo
 
 - name: Composer | Install
   command: php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
@@ -84,7 +87,16 @@
     creates: "/opt/tinker/shared_files/yii_project/{{ yii_git_repo | basename }}/vendor" 
   sudo: yes
   sudo_user: "{{ server_user }}"
-  when: yii_git_repo is defined  
+  when: yii_git_repo is defined
+  tags: update_repo
+
+- name: Kill existing yii services
+  shell: ps aux | grep yii | grep -v grep | awk '{printf(\"%s \"), $2}' | xargs kill -9
+  sudo: yes
+  sudo_user: "{{ server_user }}"
+  tags:
+    - kill_yii
+    - update_repo
   
 - name: Run yii server
   shell: nohup php yii serve 0.0.0.0:8080 > /tmp/yii.log 2>&1 &
@@ -92,7 +104,9 @@
     chdir: "/opt/tinker/shared_files/yii_project/{{ yii_git_repo | basename }}"
   sudo: yes
   sudo_user: "{{ server_user }}"
-  tags: run_yii
+  tags:
+    - run_yii
+    - update_repo
   when: yii_git_repo is defined
 
 - name: Add cron jobs
