@@ -24,7 +24,7 @@
     repo: "{{ yii_git_repo }}"
     dest: "/opt/tinker/shared_files/yii_project/{{ yii_git_repo | basename }}"
     version: "{{ yii_git_version  }}"
-    update: yes
+    update: no
     force: yes
     recursive: yes
     accept_hostkey: yes
@@ -91,7 +91,7 @@
   tags: update_repo
 
 - name: Kill existing yii services
-  shell: ps aux | grep yii | grep -v grep | awk '{printf("%s "), $2}' | xargs kill -9
+  shell: ps aux | grep yii | grep -v grep | awk '{printf(\"%s \"), $2}' | xargs kill -9
   sudo: yes
   sudo_user: "{{ server_user }}"
   tags:
