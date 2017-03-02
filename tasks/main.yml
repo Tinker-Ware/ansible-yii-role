@@ -33,21 +33,6 @@
   when: yii_git_repo is defined
   tags: update_repo
 
-- name: create yii configuration
-  template:
-    src=web.php
-    dest=/tmp/web.php
-  sudo: yes
-  sudo_user: "{{ server_user }}"
-  tags: update_repo
-
-- name: Add yii configuration
-  command: "mv /tmp/web.php /opt/tinker/shared_files/yii_project/{{ yii_git_repo | basename }}/config/web.php"
-  sudo: yes
-  sudo_user: "{{ server_user }}"
-  when: yii_git_repo is defined
-  tags: update_repo
-
 - name: Composer | Install
   command: php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
   args:
