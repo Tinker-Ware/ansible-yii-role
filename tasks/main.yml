@@ -24,7 +24,7 @@
     repo: "{{ yii_git_repo }}"
     dest: "/opt/tinker/shared_files/yii_project/{{ yii_git_repo | basename }}"
     version: "{{ yii_git_version  }}"
-    update: no
+    update: yes
     force: yes
     recursive: yes
     accept_hostkey: yes
@@ -38,13 +38,6 @@
   args:
     chdir: "/opt/tinker/shared_files/yii_project/{{ yii_git_repo | basename }}"
     creates: "/opt/tinker/shared_files/yii_project/{{ yii_git_repo | basename }}/composer-setup.php"
-  sudo: yes
-  sudo_user: "{{ server_user }}"
-
-- name: Composer | Verify
-  command: php -r "if (hash_file('SHA384', 'composer-setup.php') === '55d6ead61b29c7bdee5cccfb50076874187bd9f21f65d8991d46ec5cc90518f447387fb9f76ebae1fbbacf329e583e30') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); } echo PHP_EOL;"
-  args:
-    chdir: "/opt/tinker/shared_files/yii_project/{{ yii_git_repo | basename }}"
   sudo: yes
   sudo_user: "{{ server_user }}"
 
@@ -76,11 +69,11 @@
   tags: update_repo
 
 - name: Kill existing yii services
-  shell: ps aux | grep yii | grep -v grep | awk '{printf(\"%s \"), $2}' | xargs kill -9
+  shell: "ps aux | grep yii | grep -v grep | awk '{printf(\"%s \"), $2}' | xargs kill -9"
   sudo: yes
   sudo_user: "{{ server_user }}"
   tags:
-    - kill_yii
+    - update_services
     - update_repo
   
 - name: Run yii server
@@ -90,7 +83,7 @@
   sudo: yes
   sudo_user: "{{ server_user }}"
   tags:
-    - run_yii
+    - update_services
     - update_repo
   when: yii_git_repo is defined
 
