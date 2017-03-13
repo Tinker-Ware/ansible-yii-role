@@ -83,7 +83,7 @@
     - update_yii_repo
   
 - name: Run yii server
-  shell: nohup php yii serve 0.0.0.0:8080 2>&1 | tee /tmp/yii.log &
+  shell: nohup php yii serve 0.0.0.0:8080 2>&1 | tee /tmp/yii.log /opt/tinker/shared_files/yii.log &
   args:
     chdir: "/opt/tinker/shared_files/yii_project/{{ yii_git_repo | basename }}"
   sudo: yes
