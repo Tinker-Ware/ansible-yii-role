@@ -68,7 +68,7 @@
   shell: "php composer.phar update -n {{ yii_extra_flags }}"
   args:
     chdir: "/opt/tinker/shared_files/yii_project/{{ yii_git_repo | basename }}"
-#    creates: "/opt/tinker/shared_files/yii_project/{{ yii_git_repo | basename }}/vendor" 
+    creates: "/opt/tinker/shared_files/yii_project/{{ yii_git_repo | basename }}/vendor" 
   sudo: yes
   sudo_user: "{{ server_user }}"
   when: yii_git_repo is defined
