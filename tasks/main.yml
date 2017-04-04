@@ -79,8 +79,7 @@
   sudo: yes
   sudo_user: "{{ server_user }}"
   tags:
-    - update_services
-    - update_yii_repo
+    - restart_services
   
 - name: Run yii server
   shell: nohup php yii serve 0.0.0.0:8080 2>&1 | tee -a /opt/tinker/shared_files/logs/yii.log &
@@ -90,8 +89,7 @@
   sudo_user: "{{ server_user }}"
   register: command_result
   tags:
-    - update_services
-    - update_yii_repo
+    - restart_services
   when: yii_git_repo is defined
 
 - name: Log errors if any
@@ -100,7 +98,7 @@
     content: "{{ ansible_date_time.date }} {{ ansible_date_time.time }} {{ command_result.stdout }}"
   when: "'started' not in command_result.stdout"
   tags:
-    - update_services
+    - restart_services
     - update_yii_repo
   sudo: yes
   sudo_user: "{{ server_user }}"
