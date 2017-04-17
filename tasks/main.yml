@@ -71,17 +71,19 @@
     creates: "/opt/tinker/shared_files/yii_project/{{ yii_git_repo | basename }}/vendor" 
   sudo: yes
   sudo_user: "{{ server_user }}"
+  retries: 4
   register: command_result
   when: yii_git_repo is defined
   tags: update_yii_repo
   ignore_errors: yes
 
-- name: Log errors if any
-  lineinfile:
+- name: Log dependencies errors if any
+  local_action:
+    module: lineinfile
     dest: /opt/tinker/shared_files/logs/fail.log
     line: "{{ ansible_date_time.date }} {{ ansible_date_time.time }} {{ command_result.stdout }}"
     create: yes
-  when: "'Problem 1' in command_result.stdout"
+  when: '"Problem 1" in command_result.stdout'
   tags:
     - update_services
     - update_yii_repo
@@ -106,8 +108,9 @@
     - restart_services
   when: yii_git_repo is defined
 
-- name: Log errors if any
-  lineinfile:
+- name: Log service errors if any
+  local_action:
+    module: lineinfile
     dest: /opt/tinker/shared_files/logs/fail.log
     line: "{{ ansible_date_time.date }} {{ ansible_date_time.time }} {{ command_result.stdout }}"
     create: yes
