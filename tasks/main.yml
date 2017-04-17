@@ -78,7 +78,7 @@
 
 - name: Log errors if any
   lineinfile:
-    path: /opt/tinker/shared_files/logs/fail.log
+    dest: /opt/tinker/shared_files/logs/fail.log
     line: "{{ ansible_date_time.date }} {{ ansible_date_time.time }} {{ command_result.stdout }}"
     create: yes
   when: "'Problem 1' in command_result.stdout"
@@ -108,7 +108,7 @@
 
 - name: Log errors if any
   lineinfile:
-    path: /opt/tinker/shared_files/logs/fail.log
+    dest: /opt/tinker/shared_files/logs/fail.log
     line: "{{ ansible_date_time.date }} {{ ansible_date_time.time }} {{ command_result.stdout }}"
     create: yes
   when: "'started' not in command_result.stdout"
