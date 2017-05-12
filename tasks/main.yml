@@ -93,6 +93,14 @@
   sudo: yes
   sudo_user: "{{ server_user }}"
 
+- name: Ensure correct folder permissions
+  file: "{{ item }}"
+  mode: 0777
+  sudo: yes
+  with_items:
+    - "/opt/tinker/shared_files/{{ yii_git_repo | basename }}/runtime"
+    - "/opt/tinker/shared_files/{{ yii_git_repo | basename }}/web/assets"
+
 - name: Write custom NGINX configuration
   template:
     src: vhosts.conf
