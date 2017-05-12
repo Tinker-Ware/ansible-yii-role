@@ -95,7 +95,7 @@
 
 - name: Ensure correct folder permissions
   file: "{{ item }}"
-  mode: 0777
+    mode: 0777
   sudo: yes
   with_items:
     - "/opt/tinker/shared_files/{{ yii_git_repo | basename }}/runtime"
