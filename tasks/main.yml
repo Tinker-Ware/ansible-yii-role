@@ -94,7 +94,8 @@
   sudo_user: "{{ server_user }}"
 
 - name: Ensure correct folder permissions
-  file: "{{ item }}"
+  file:
+    path: "{{ item }}"
     mode: 0777
   sudo: yes
   with_items:
