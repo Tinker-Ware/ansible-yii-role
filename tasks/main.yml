@@ -12,35 +12,33 @@
 
 - name: Create destination folder
   file:
-    path: "{{ item }}"
+    path: "{{ dest }}"
     state: directory
     owner: "{{ server_user }}"
     group: "{{ server_group }}"
     mode: 0755
   sudo: yes
   sudo_user: "{{ server_user }}"
-  with_items:
-    - "/opt/tinker/shared_files"
 
 - name: Clone git yii repo
   git:
-    repo: "{{ yii_git_repo }}"
-    dest: "/opt/tinker/shared_files/{{ yii_git_repo | basename }}"
-    version: "{{ yii_git_version  }}"
+    repo: "{{ repo }}"
+    dest: "{{ dest }}"
+    version: "{{ version  }}"
     update: yes
     force: yes
     recursive: yes
     accept_hostkey: yes
   sudo: yes
   sudo_user: "{{ server_user }}"    
-  when: yii_git_repo is defined
+  when: repo is defined
   tags: update_yii_repo
 
 - name: Composer | Install
   command: php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
   args:
-    chdir: "/opt/tinker/shared_files/{{ yii_git_repo | basename }}"
-    creates: "/opt/tinker/shared_files/{{ yii_git_repo | basename }}/composer-setup.php"
+    chdir: "{{ dest }}"
+    creates: "{{ dest }}/composer-setup.php"
   sudo: yes
   sudo_user: "{{ server_user }}"
   tags:
@@ -49,8 +47,8 @@
 - name: Composer | Setup
   command: php composer-setup.php
   args:
-    chdir: "/opt/tinker/shared_files/{{ yii_git_repo | basename }}"
-    creates: "/opt/tinker/shared_files/{{ yii_git_repo | basename }}/composer.phar"
+    chdir: "{{ dest }}"
+    creates: "{{ dest }}/composer.phar"
   sudo: yes
   sudo_user: "{{ server_user }}"
   tags:
@@ -59,24 +57,24 @@
 - name: Install Yii2 dependencies 
   shell: 'php composer.phar global require "fxp/composer-asset-plugin"'
   args:
-    chdir: "/opt/tinker/shared_files/{{ yii_git_repo | basename }}"
+    chdir: "{{ dest }}"
     creates: "/home/{{ server_user }}/.composer/vendor"
   sudo: yes
   sudo_user: "{{ server_user }}"
-  when: yii_git_repo is defined
+  when: repo is defined
   tags:
     - update_yii_repo  
 
 - name: Update dependencies for repo. This may take a while . . . . . 
   shell: "php composer.phar update -n {{ yii_extra_flags }}"
   args:
-    chdir: "/opt/tinker/shared_files/{{ yii_git_repo | basename }}"
-    creates: "/opt/tinker/shared_files/{{ yii_git_repo | basename }}/vendor" 
+    chdir: "{{ dest }}"
+    creates: "{{ dest }}/vendor" 
   sudo: yes
   sudo_user: "{{ server_user }}"
   retries: 4
   register: command_result
-  when: yii_git_repo is defined
+  when: repo is defined
   tags: update_yii_repo
   ignore_errors: yes
 
@@ -94,12 +92,13 @@
   sudo_user: "{{ server_user }}"
 
 - name: Ensure correct folder permissions
-  file: "{{ item }}"
+  file:
+    path: "{{ item }}"
     mode: 0777
   sudo: yes
   with_items:
-    - "/opt/tinker/shared_files/{{ yii_git_repo | basename }}/runtime"
-    - "/opt/tinker/shared_files/{{ yii_git_repo | basename }}/web/assets"
+    - "{{ dest }}/runtime"
+    - "{{ dest }}/web/assets"
 
 - name: Write custom NGINX configuration
   template:

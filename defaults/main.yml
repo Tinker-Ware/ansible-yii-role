@@ -1,5 +1,6 @@
 cookie_validation_key: pass
 
-yii_git_repo: https://github.com/Tinker-Ware/yii2-crud.git
-yii_git_version: master
+repo: https://github.com/Tinker-Ware/yii2-crud.git
+dest: "/opt/tinker/shared_files/project"
+version: master
 yii_extra_flags: "--no-dev"
