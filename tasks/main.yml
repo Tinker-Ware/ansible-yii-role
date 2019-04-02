@@ -8,7 +8,7 @@
     - php-pear
     - php5-mysql
     - php5-gd
-  sudo: yes
+  become: yes
 
 - name: Create destination folder
   file:
@@ -17,8 +17,8 @@
     owner: "{{ server_user }}"
     group: "{{ server_group }}"
     mode: 0755
-  sudo: yes
-  sudo_user: "{{ server_user }}"
+  become: yes
+  become_user: "{{ server_user }}"
 
 - name: Clone git yii repo
   git:
@@ -29,8 +29,8 @@
     force: yes
     recursive: yes
     accept_hostkey: yes
-  sudo: yes
-  sudo_user: "{{ server_user }}"    
+  become: yes
+  become_user: "{{ server_user }}"
   when: repo is defined
   tags: update_yii_repo
 
@@ -44,8 +44,8 @@
   args:
     chdir: "{{ dest }}"
     creates: "{{ dest }}/composer-setup.php"
-  sudo: yes
-  sudo_user: "{{ server_user }}"
+  become: yes
+  become_user: "{{ server_user }}"
   tags:
     - update_yii_repo
 
@@ -54,29 +54,29 @@
   args:
     chdir: "{{ dest }}"
     creates: "{{ dest }}/composer.phar"
-  sudo: yes
-  sudo_user: "{{ server_user }}"
+  become: yes
+  become_user: "{{ server_user }}"
   tags:
     - update_yii_repo
 
-- name: Install Yii2 dependencies 
+- name: Install Yii2 dependencies
   shell: 'php composer.phar global require "fxp/composer-asset-plugin"'
   args:
     chdir: "{{ dest }}"
     creates: "/home/{{ server_user }}/.composer/vendor"
-  sudo: yes
-  sudo_user: "{{ server_user }}"
+  become: yes
+  become_user: "{{ server_user }}"
   when: repo is defined
   tags:
-    - update_yii_repo  
+    - update_yii_repo
 
-- name: Update dependencies for repo. This may take a while . . . . . 
+- name: Update dependencies for repo. This may take a while . . . . .
   shell: "php composer.phar update -n {{ yii_extra_flags }}"
   args:
     chdir: "{{ dest }}"
-    creates: "{{ dest }}/vendor" 
-  sudo: yes
-  sudo_user: "{{ server_user }}"
+    creates: "{{ dest }}/vendor"
+  become: yes
+  become_user: "{{ server_user }}"
   retries: 4
   register: command_result
   when: repo is defined
@@ -93,14 +93,14 @@
   tags:
     - update_services
     - update_yii_repo
-  sudo: yes
-  sudo_user: "{{ server_user }}"
+  become: yes
+  become_user: "{{ server_user }}"
 
 - name: Ensure correct folder permissions
   file:
     path: "{{ item }}"
     mode: 0777
-  sudo: yes
+  become: yes
   with_items:
     - "{{ dest }}/runtime"
     - "{{ dest }}/web/assets"
@@ -112,4 +112,4 @@
     owner: root
     group: root
     mode: 0644
-  sudo: yes
+  become: yes
